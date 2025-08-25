@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/rlapine/shapefile2db/refs/heads/main/assets/shapefile2db_logo.png" alt="shapefile2db logo" width="400"/>
+  <img src="https://github.com/rlapine/shapefile2db/blob/a74b42f3ce5df2543c750a41a2d56efca3143a02/shapefile2db/assets/ShapeFile2DB_logo.png" alt="shapefile2db logo" width="400"/>
 </p>
 
 ---
@@ -24,14 +24,6 @@ ZipShapeFile2DB is a Python package for extracting, filtering, and exporting ZIP
 Designed for developers and data analysts, it offers a clean command-line interface and a modular API that integrates seamlessly into Python workflows.
 
 Whether you're automating shapefile exports, building spatial dashboards, or prepping data for SQL-based queries, ZipShapeFile2DB provides a transparent, scriptable pipeline with real-time logging, schema validation, and flexible output options.
-
----
-
-## Badges
-
-![PyPI](https://img.shields.io/pypi/v/shapefile2db?color=blue)  
-![License](https://img.shields.io/github/license/rlapine/shapefile2db)  
-![Coverage](https://img.shields.io/codecov/c/github/rlapine/shapefile2db)
 
 ---
 
@@ -140,7 +132,7 @@ Rows Exported: 596 Time Remaining: 00:00:46.
 
 ### 🖥️ CLI Demo
 
-![CLI Export Demo](https://raw.githubusercontent.com/rlapine/shapefile2db/refs/heads/main/assets/shapefile2db_output.gif)
+![CLI Export Demo](https://github.com/rlapine/shapefile2db/blob/a74b42f3ce5df2543c750a41a2d56efca3143a02/shapefile2db/assets/ShapeFile2DB_output.gif)
 
 ---
 
