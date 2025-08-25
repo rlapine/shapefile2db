@@ -46,6 +46,7 @@ https://www.census.gov/geographies/mapping-files/time-series/geo/tiger-line-file
 This download will provid a zipped file containing all of the shapefile components (several files)
 
 Required Shapefile Components:
+
     .shp (Shape Format):
         Contains the primary geometry data for each feature (points, lines, polygons).
 
