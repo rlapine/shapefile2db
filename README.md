@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://github.com/rlapine/shapefile2db/blob/a74b42f3ce5df2543c750a41a2d56efca3143a02/shapefile2db/assets/ShapeFile2DB_logo.png" alt="shapefile2db logo" width="400"/>
+  <img src="https://github.com/rlapine/shapefile2db/blob/624aa335a27f6db7b56f53907ff8aecf3f031ba7/shapefile2db/assets/ShapeFile2DB_logo.png?raw=true" alt="shapefile2db logo" width="400"/>
 </p>
 
 ---
@@ -132,7 +132,7 @@ Rows Exported: 596 Time Remaining: 00:00:46.
 
 ### 🖥️ CLI Demo
 
-![CLI Export Demo](https://github.com/rlapine/shapefile2db/blob/a74b42f3ce5df2543c750a41a2d56efca3143a02/shapefile2db/assets/ShapeFile2DB_output.gif)
+![CLI Export Demo](https://github.com/rlapine/shapefile2db/blob/624aa335a27f6db7b56f53907ff8aecf3f031ba7/shapefile2db/assets/ShapeFile2DB_output.gif?raw=true)
 
 ---
 
