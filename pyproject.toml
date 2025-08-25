@@ -47,7 +47,7 @@ classifiers = [
 
 [project.urls]
 Homepage = "https://github.com/rlapine/shapefile2db"
-Documentation = "https://github.com/rlapine/shapefile2db"
+Documentation = "https://github.com/rlapine/shapefile2db/blob/624aa335a27f6db7b56f53907ff8aecf3f031ba7/README.md"
 Repository = "https://github.com/rlapine/shapefile2db"
 
 [project.scripts]
