@@ -27,7 +27,7 @@ Date:
     2025-07-25
 
 Version:
-    0.1.1
+    0.1.2
 
 Required Shapefile Components:
     .shp (Shape Format):

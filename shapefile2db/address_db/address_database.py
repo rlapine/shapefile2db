@@ -209,7 +209,8 @@ class AddressDatabase:
 
         Args:
             zcta_id: Foreign key ID of the ZCTA.
-            zcta_points: List of (latitude, longitude) tuples.
+            zcta_points: List of (longitude, latitude) tuples.
+            NOTE: IN SHAPEFILE LONGITUDE COMES FIRST THEN LATITUDE
 
         Returns:
             bool: True if successful, False otherwise.
@@ -218,7 +219,8 @@ class AddressDatabase:
         try:
             Session = sessionmaker(bind=self.engine)
             with Session() as session:
-                for lat, lon in zcta_points:
+                # NOTE: longitude comes first in SHAPEFILE
+                for lon, lat  in zcta_points:
                     new_point = ZCTAPoint(zcta_id=zcta_id, zcta_point_lat=lat, zcta_point_lon=lon)
                     session.add(new_point)
                 session.commit()
