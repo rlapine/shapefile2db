@@ -13,6 +13,7 @@ Features:
     - Filters ZIP code geometries using classification rules.
     - Saves ZIP codes, tabulation areas, and boundary coordinates to SQLite.
     - Requires both .shp and .shx files for optimal performance.
+    - Can pass in lower numbers for max_points and max_digits to decrease definition of ZCTA and increase performance
 
 Usage:
     - Set the shapefile path and database path via `__init__`, or use defaults.
@@ -27,7 +28,7 @@ Date:
     2025-07-25
 
 Version:
-    0.1.2
+    0.1.3
 
 Required Shapefile Components:
     .shp (Shape Format):
@@ -56,6 +57,8 @@ import pandas as pd  # For tabular data manipulation
 import geopandas as gpd  # For geospatial data handling
 from geopandas import GeoDataFrame  # Explicit import for type hinting or subclassing
 import shapely.geometry  # For geometric operations (points, polygons, etc.)
+from shapely import simplify
+
 from printpop import (
     print_red, print_cyan, print_lime, print_pink, print_orange, print_bold
 )  # Styled console output for emphasis or debugging
@@ -77,6 +80,10 @@ class ShapeFileToDB:
     SHAPE_FILE_NAME = "tl_2020_us_zcta520.shp"
     ZIP_LENGTH = 5
 
+    # --- max points and accuracy. Lower these for improved efficiency
+    DEFAULT_DIGIT_MAX = 4
+    DEFAULT_POINT_MAX = 100
+    
     # --- Table Names ---
     ZIP_TABLE = "zip_codes"
     ZCTA_TABLE = "zip_tabulation_areas"
@@ -121,6 +128,9 @@ class ShapeFileToDB:
     absolute_file_path = None  # Absolute path to the shapefile
     absolute_db_path = None    # Absolute path to the SQLite database
 
+    digit_max = DEFAULT_DIGIT_MAX 
+    point_max = DEFAULT_POINT_MAX
+
     timer = False              # Flag for timing operations
     reading = False            # Flag for shapefile reading status
 
@@ -130,13 +140,19 @@ class ShapeFileToDB:
     
 
 
-    def __init__(self, shape_file_name: str = None, database_name: str = None):
+    def __init__(self, 
+                 shape_file_name: str = None, 
+                 database_name: str = None,
+                 digit_max: int = None, 
+                 point_max: int = None):
         """
         Initializes the ShapeFileToDB instance with paths to the shapefile and database.
 
         Args:
             shape_file_name (str): Relative path to the input shapefile (.shp). If just filename then needs to be in working directory.
             database_name (str): Relative path to the output SQLite database.
+            digit_max (int, optional): Max amount of digits for lat and lon
+            point_max (int, optional): Max amount of points for each zcta. Lower number to improve efficiency.
         """
         if shape_file_name is None:
             shape_file_name = self.SHAPE_FILE_NAME
@@ -144,9 +160,17 @@ class ShapeFileToDB:
         if database_name is None:
             database_name = self.DB_NAME
 
+        if digit_max is None:
+            digit_max = self.DEFAULT_DIGIT_MAX
+        
+        if point_max is None:
+            point_max = self.DEFAULT_POINT_MAX
+
         # Resolve absolute paths for input and output
         self.absolute_file_path = os.path.normpath(os.path.abspath(shape_file_name))
         self.absolute_db_path = os.path.normpath(os.path.abspath(database_name))
+        self.digit_max = digit_max
+        self.point_max = point_max
         print("Database Path: ", end="", flush=True)
         print_cyan(self.absolute_db_path, flush=True)
         print("Shapefile Path:", end="", flush=True)
@@ -159,7 +183,7 @@ class ShapeFileToDB:
     def export(self):
         df = self.get_df_from_shapefile()
         if df is not None and not df.empty:
-            self.export_shapedf_to_db(zcta_df=df)
+            self.export_shapedf_to_db(zcta_df=df, digit_max=self.digit_max, point_max=self.point_max)
             return True
         else:
             print_red("No data to export.")
@@ -344,7 +368,7 @@ class ShapeFileToDB:
 
         # Perform the sort
         df_sorted = df.sort_values(by=sort_column)
-
+        # df_sorted = df.drop_duplicates(keep='last')
         # Record and display end time
         # end_time = datetime.now()
         # formatted_end = end_time.strftime("%H:%M:%S:%f")[:self.TIMER_JUST]
@@ -430,7 +454,52 @@ class ShapeFileToDB:
     
 
 
-    def export_shapedf_to_db(self, zcta_df) -> bool:
+    # def shorten_list(self, orig_list, max_len):
+        
+
+    #     # short_list = orig_list
+
+    #     # digits = 6
+
+    #     # while len(short_list) > max_len and digits >= 2:
+    #     #     # round and delete duplicates
+    #     #     short_list = [(round(val1, digits), round(val2, digits)) for val1, val2 in orig_list]
+    #     #     # Convert the list to a set to automatically remove duplicates
+    #     #     unique_tuples_set = set(short_list)
+
+    #     #     # Convert the set back to a list if you need a list as the final output
+    #     #     short_list = list(unique_tuples_set)
+    #     #     digits = digits - 1
+
+    #     # return short_list
+
+    #     # round and delete duplicates
+    #     digits = 4
+    #     short_list = [(round(val1, digits), round(val2, digits)) for val1, val2 in orig_list]
+    #     # # Convert the list to a set to automatically remove duplicates
+    #     # unique_tuples_set = set(short_list)
+
+    #     # # Convert the set back to a list if you need a list as the final output
+    #     # short_list = list(unique_tuples_set)
+    #     seen = set()
+    #     unique_tuples = []
+    #     for item in short_list:
+    #         if item not in seen:
+    #             unique_tuples.append(item)
+    #             seen.add(item)
+    #     return unique_tuples
+
+    def minimize_poly(self, poly, point_max):
+        # Add exterior boundary points
+        tolerance = 0
+        cord_list = list(poly.exterior.coords)
+        while len(cord_list) > point_max:
+            poly = simplify(poly, tolerance=tolerance, preserve_topology=True)
+            cord_list = list(poly.exterior.coords)
+            tolerance = tolerance + 0.0001
+        return poly
+        
+    def export_shapedf_to_db(self, zcta_df, digit_max, point_max) -> bool:
         """Exports ZIP code and ZCTA boundary data from a GeoDataFrame to a SQLite database.
 
         Args:
@@ -476,10 +545,11 @@ class ShapeFileToDB:
                                     start_time=start_time,
                                     overwrite=False)
 
+
         for _, row in zcta_df.iterrows():
             zip_code = row[self.ZIP_FIELD]
-            zip_lat = row[self.ZIP_LAT_FIELD]
-            zip_lon = row[self.ZIP_LON_FIELD]
+            zip_lat = round(float(row[self.ZIP_LAT_FIELD]), digit_max)
+            zip_lon = round(float(row[self.ZIP_LON_FIELD]), digit_max)
             zip_geometry = row[self.ZIP_GEOMETRY_FIELD]
 
             # Add ZIP code entry
@@ -492,17 +562,27 @@ class ShapeFileToDB:
                     multi = isinstance(zip_geometry, shapely.geometry.MultiPolygon)
 
                     for poly in polygons:
+                        # reduce poly to under max points
+                        poly = self.minimize_poly(poly=poly, point_max=point_max)
+
                         # Add ZCTA entry for exterior
                         zcta_obj = address_db.add_zcta(zip_code_id=zip_obj.zip_code_id, interior=False, multi=multi)
 
                         # Add exterior boundary points
                         ext_cord_list = list(poly.exterior.coords)
+
+                        # round to max digits for cords
+                        ext_cord_list = [(round(val1, digit_max), round(val2, digit_max)) for val1, val2 in ext_cord_list]
+        
                         address_db.add_all_zcta_points(zcta_id=zcta_obj.zcta_id, zcta_points=ext_cord_list)
 
                         # Add interior boundary points (if any)
                         for interior_ring in poly.interiors:
                             zcta_int_obj = address_db.add_zcta(zip_code_id=zip_obj.zip_code_id, interior=True, multi=multi)
                             interior_coord_list = list(interior_ring.coords)
+                            interior_coord_list = [(round(val1, self.digit_max), round(val2, self.digit_max)) for val1, val2 in interior_coord_list]
+                        
+                            # interior_coord_list = self.filter_list(the_list = interior_coord_list, digit_max = self.digit_max, point_max = self.point_max)
                             address_db.add_all_zcta_points(zcta_id=zcta_int_obj.zcta_id, zcta_points=interior_coord_list)
 
                 except Exception as ex:

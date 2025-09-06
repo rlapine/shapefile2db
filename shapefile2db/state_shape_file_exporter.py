@@ -28,18 +28,26 @@ class StateShapeFileToDB(ShapeFileToDB):
     """
 
     DB_BASE = "_address.db"
+
+    # --- Instance Variables ---
     state = None
     zip_ranges_list = None
+    
+    
 
-
-
-    def __init__(self, state: str, shape_file_name: str = None, database_name: str = None):
+    def __init__(self, state: str, 
+                 shape_file_name: str = None, 
+                 database_name: str = None, 
+                 digit_max: int = None, 
+                 point_max: int = None):
         """Initializes the state-specific exporter.
 
         Args:
             state (str): Two-letter abbreviation of the state (e.g., 'CA', 'TX').
             shape_file_name (str, optional): Path to the .shp file. If None, uses default.
             database_name (str, optional): Name of the SQLite database. If None, uses default.
+            digit_max (int, optional): Max amount of digits for lat and lon
+            point_max (int, optional): Max amount of points for each zcta. Lower number to improve efficiency.
 
         Raises:
             ValueError: If the provided state is not a valid abbreviation in STATE_ZIP_RANGES.
@@ -58,7 +66,10 @@ class StateShapeFileToDB(ShapeFileToDB):
             database_name = f"{self.state.lower()}{self.DB_BASE}"
 
         # Initialize parent class with shape file and database name
-        super().__init__(shape_file_name=shape_file_name, database_name=database_name)
+        super().__init__(shape_file_name=shape_file_name, 
+                         database_name=database_name, 
+                         digit_max=digit_max,
+                         point_max=point_max)
 
 
 

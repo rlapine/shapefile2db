@@ -11,7 +11,7 @@ Typical usage example:
     from shapefileexporter import ShapeFileToDB, export_shapefile_to_db
 """
 
-__version__ = "0.1.2"
+__version__ = "0.1.3"
 
 from shapefile2db.shape_file_exporter import ShapeFileToDB
 from shapefile2db.state_shape_file_exporter import StateShapeFileToDB
