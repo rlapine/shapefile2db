@@ -4,7 +4,7 @@
 # Manages connection and initialization of the address.db file
 # """
 
-__version__ = "0.1.3"
+__version__ = "0.1.4"
 
 from shapefile2db.address_db.address_database import AddressDatabase
 from shapefile2db.address_db.address_constants import STATE_DICT, STATE_ZIP_RANGES

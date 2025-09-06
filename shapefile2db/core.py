@@ -20,7 +20,11 @@ from shapefile2db.state_shape_file_exporter import StateShapeFileToDB
 from printpop import print_bold, print_red, print_green
 
 
-def export_shapefile_to_db(state: str = None, shape_file_name: str = None, database_name: str = None):
+def export_shapefile_to_db(state: str = None, 
+                           shape_file_name: str = None, 
+                           database_name: str = None, 
+                           digit_max: int = None, 
+                           point_max: int = None):
     """Exports ZIP code geometries from a shapefile to a SQLite database.
 
     This function handles both state-specific and all-state exports based on the
@@ -33,21 +37,32 @@ def export_shapefile_to_db(state: str = None, shape_file_name: str = None, datab
                                If None, exports all states.
         shape_file_name (str, optional): Path to the .shp file. If None, uses default.
         database_name (str, optional): Name of the SQLite database. If None, uses default.
+        digit_max (int, optional): Max amount of digits for lat and lon
+        point_max (int, optional): Max amount of points for each zcta. Lower number to improve efficiency.
 
     Raises:
         ValueError: If the provided state is not a valid abbreviation in STATE_ZIP_RANGES.
     """
     if state:
         # Use StateShapeFileToDB for state-specific export
-        exporter = StateShapeFileToDB(state=state, shape_file_name=shape_file_name, database_name=database_name)
+        exporter = StateShapeFileToDB(state=state, 
+                                      shape_file_name=shape_file_name, 
+                                      database_name=database_name,
+                                      digit_max=digit_max,
+                                      point_max=point_max)
     else:
         # Use ShapeFileToDB for all-state export
-        exporter = ShapeFileToDB(shape_file_name=shape_file_name, database_name=database_name)
+        exporter = ShapeFileToDB(shape_file_name=shape_file_name, 
+                                 database_name=database_name,
+                                 digit_max=digit_max,
+                                 point_max=point_max)
 
     # Get DataFrame from shapefile
     df = exporter.get_df_from_shapefile()
     
     # Export DataFrame to database
-    exporter.export_shapedf_to_db(zcta_df=df)   
+    exporter.export_shapedf_to_db(zcta_df=df,
+                                  digit_max=digit_max,
+                                  point_max=point_max)   
 
 
