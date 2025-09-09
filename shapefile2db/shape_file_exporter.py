@@ -28,7 +28,7 @@ Date:
     2025-07-25
 
 Version:
-    0.1.5
+    0.1.6
 
 Required Shapefile Components:
     .shp (Shape Format):
@@ -171,10 +171,14 @@ class ShapeFileToDB:
         self.absolute_db_path = os.path.normpath(os.path.abspath(database_name))
         self.digit_max = digit_max
         self.point_max = point_max
-        print("Database Path: ", end="", flush=True)
+        print("Database Path: ".ljust(self.LABEL_JUST), end="", flush=True)
         print_cyan(self.absolute_db_path, flush=True)
-        print("Shapefile Path:", end="", flush=True)
+        print("Shapefile Path:".ljust(self.LABEL_JUST), end="", flush=True)
         print_cyan(self.absolute_file_path, flush=True)
+        print("ZCTA Point Max:".ljust(self.LABEL_JUST), end="", flush=True)
+        print_cyan(self.point_max, flush=True)
+        print("ZCTA Point Digits:".ljust(self.LABEL_JUST), end="", flush=True)
+        print_cyan(self.digit_max, flush=True)
         self.check_shapefile(shape_file_name=self.absolute_file_path)
 
 
@@ -524,6 +528,11 @@ class ShapeFileToDB:
         current_row = 0
         start_time = datetime.now()
         current_time = datetime.now()
+        
+        if digit_max is None:
+            digit_max = self.digit_max
+        if point_max is None:
+            point_max = self.point_max
 
         # Connect to or create the database
         address_db = AddressDatabase(db_absolute_path=self.absolute_db_path)
@@ -630,6 +639,7 @@ class ShapeFileToDB:
         
         # Display export end time
         formatted_end = datetime.now().strftime("%H:%M:%S:%f")[:self.TIMER_JUST]
+        print()
         print("Export End:".ljust(self.LABEL_JUST), end="", flush=True)
         print_orange(formatted_end)
         print()

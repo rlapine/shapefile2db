@@ -1,6 +1,6 @@
 [project]
 name = "shapefile2db"
-version = "0.1.5"
+version = "0.1.6"
 description = "Exports US Census ZCTA (Zip Code Tabulation Area) shapefiles to a SQLite database via CLI or Python API."
 authors = [
     { name = "Ryan Lapine", email = "github.stunt845@passinbox.com" }
