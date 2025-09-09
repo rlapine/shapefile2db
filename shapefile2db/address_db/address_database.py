@@ -17,7 +17,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import sessionmaker
 
 # Local imports
-from shapefile2db.address_db.address_models import ZipCode, ZCTA, ZCTAPoint, Base
+from shapefile2db.address_db.address_models import ZipCode, ZCTA, ZCTAPoint, ZCTABoundary, Base
 
 # IO and console output
 from printpop import print_cyan, print_red, print_orange
@@ -270,6 +270,8 @@ class AddressDatabase:
         if session:
             session.rollback()
         return None
+    
+    
 
     
     
@@ -291,3 +293,66 @@ class AddressDatabase:
         except Exception as e:
             print_red(f"Unexpected error in get_zcta_points(): {type(e).__name__}: {e}")
         return []
+    
+
+    def add_zcta_boundary(self, zcta_id: int, 
+                                 min_lat: float, 
+                                 max_lat: float, 
+                                 min_lon: float, 
+                                 max_lon: float):
+        """Adds points defining boundary box around a zcta
+
+        Args:
+            zcta_id: Foreign key ID of the ZCTA.
+            min_lat: min latitude of boundary
+            max_lat: max latitude of boundary
+            min_lon: min longitude of boundary
+            max_lon: max longitude of boundary
+
+        Returns:
+            ZCTABoundary: The newly created ZCTABoundary object, or None if failed.
+        """
+        session = None
+        try:
+            Session = sessionmaker(bind=self.engine)
+            with Session() as session:
+                new_point = ZCTABoundary(
+                    zcta_id=zcta_id,
+                    min_lat = min_lat,
+                    max_lat = max_lat,
+                    min_lon = min_lon,
+                    max_lon = max_lon
+                )
+                session.add(new_point)
+                session.commit()
+                session.refresh(new_point)
+                return new_point
+        except (TypeError, ValueError) as model_error:
+            print_red(f"ValueError in add_zcta_boundary(): {model_error}")
+        except SQLAlchemyError as db_error:
+            print_red(f"SQLAlchemyError in add_zcta_boundary(): {db_error}")
+        except Exception as e:
+            print_red(f"Unexpected error in add_zcta_boundary(): {type(e).__name__}: {e}")
+        if session:
+            session.rollback()
+        return None
+    
+    def get_zcta_boundary(self, zcta_id: int):
+        """get points defining boundary box around a zcta
+
+        Args:
+            zcta_id: Foreign key ID of the ZCTA.
+
+        Returns:
+            ZCTABoundary: The ZCTABoundary object, or None if failed.
+        """
+        try:
+            Session = sessionmaker(bind=self.engine)
+            with Session() as session:
+                return session.query(ZCTABoundary).filter(ZCTABoundary.zcta_id == zcta_id).all()
+        except SQLAlchemyError as db_error:
+            print_red(f"SQLAlchemyError in get_zcta_boundary(): {db_error}")
+        except Exception as e:
+            print_red(f"Unexpected error in get_zcta_boundary(): {type(e).__name__}: {e}")
+        return []
+    

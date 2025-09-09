@@ -86,3 +86,34 @@ class ZCTAPoint(Base):
             f"zcta_point_lat={self.zcta_point_lat}, "
             f"zcta_point_lon={self.zcta_point_lon})>"
         )
+    
+class ZCTABoundary(Base):
+    """Represents points defining a boundary box around the ZCTA
+
+    Attributes:
+        zcta_bound_id (int): Primary key.
+        zcta_id (int): Foreign key linking to ZCTA.
+        min_lat (float): max_lat boundary
+        max_lat (float): max_lat boundary
+        min_lon (float): min_lon boundary
+        max_lon (float): max_lon boundary
+    """
+
+    __tablename__ = 'zcta_boundaries'
+
+    zcta_boundary_id = Column(Integer, primary_key=True)
+    zcta_id = Column(Integer)
+    min_lat = Column(Float)
+    max_lat = Column(Float)
+    min_lon = Column(Float)
+    max_lon = Column(Float)
+
+    def __repr__(self):
+        return (
+            f"<ZCTABoundary(zcta_boundary_id={self.zcta_boundary_id}, "
+            f"zcta_id={self.zcta_id}, "
+            f"min_lat={self.min_lat}, "
+            f"max_lat={self.max_lat}, "
+            f"min_lon={self.min_lon}, "
+            f"max_lon={self.max_lon})>"
+        )

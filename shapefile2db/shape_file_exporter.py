@@ -28,7 +28,7 @@ Date:
     2025-07-25
 
 Version:
-    0.1.4
+    0.1.5
 
 Required Shapefile Components:
     .shp (Shape Format):
@@ -498,13 +498,16 @@ class ShapeFileToDB:
             cord_list = list(poly.exterior.coords)
             tolerance = tolerance + 0.0001
         return poly
-        
+    
+    
+
     def export_shapedf_to_db(self, zcta_df, digit_max, point_max) -> bool:
         """Exports ZIP code and ZCTA boundary data from a GeoDataFrame to a SQLite database.
 
         Args:
             zcta_df (GeoDataFrame): DataFrame containing ZIP code geometries and metadata.
-
+            digit_max (int, optional): Max amount of digits for lat and lon
+            point_max (int, optional): Max amount of points for each zcta. Lower number to improve efficiency.
         Returns:
             bool: True if export completes successfully, False if the input is empty.
 
@@ -561,6 +564,11 @@ class ShapeFileToDB:
                     polygons = list(zip_geometry.geoms) if isinstance(zip_geometry, shapely.geometry.MultiPolygon) else [zip_geometry]
                     multi = isinstance(zip_geometry, shapely.geometry.MultiPolygon)
 
+                    poly_lat_high = None
+                    poly_lat_low = None
+                    poly_lon_high = None
+                    poly_long_low = None
+
                     for poly in polygons:
                         # reduce poly to under max points
                         poly = self.minimize_poly(poly=poly, point_max=point_max)
@@ -576,6 +584,14 @@ class ShapeFileToDB:
         
                         address_db.add_all_zcta_points(zcta_id=zcta_obj.zcta_id, zcta_points=ext_cord_list)
 
+                        # get max / min lat and lon for bounding box and add
+                        ext_lats, ext_lons = zip(*ext_cord_list)
+                        zcta_boundary = address_db.add_zcta_boundary(zcta_id=zcta_obj.zcta_id, 
+                                                                     min_lat=min(ext_lats),
+                                                                     max_lat=max(ext_lats),
+                                                                     min_lon=min(ext_lons),
+                                                                     max_lon=max(ext_lons))
+
                         # Add interior boundary points (if any)
                         for interior_ring in poly.interiors:
                             zcta_int_obj = address_db.add_zcta(zip_code_id=zip_obj.zip_code_id, interior=True, multi=multi)
@@ -585,8 +601,15 @@ class ShapeFileToDB:
                             # interior_coord_list = self.filter_list(the_list = interior_coord_list, digit_max = self.digit_max, point_max = self.point_max)
                             address_db.add_all_zcta_points(zcta_id=zcta_int_obj.zcta_id, zcta_points=interior_coord_list)
 
-                except Exception as ex:
-                    print_red(ex)
+                            int_lats, int_lons = zip(*interior_coord_list)
+                            zcta_int_boundary = address_db.add_zcta_boundary(zcta_id=zcta_obj.zcta_id, 
+                                                                     min_lat=min(int_lats),
+                                                                     max_lat=max(int_lats),
+                                                                     min_lon=min(int_lons),
+                                                                     max_lon=max(int_lons))
+
+                except Exception as e:
+                    print_red(f"Unexpected error in export_shapedf_to_db(): {type(e).__name__}: {e}")
 
             # Update export progress
             current_row += 1

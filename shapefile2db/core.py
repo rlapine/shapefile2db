@@ -24,7 +24,7 @@ def export_shapefile_to_db(state: str = None,
                            shape_file_name: str = None, 
                            database_name: str = None, 
                            digit_max: int = None, 
-                           point_max: int = None):
+                           point_max: int = None)->bool:
     """Exports ZIP code geometries from a shapefile to a SQLite database.
 
     This function handles both state-specific and all-state exports based on the
@@ -61,7 +61,7 @@ def export_shapefile_to_db(state: str = None,
     df = exporter.get_df_from_shapefile()
     
     # Export DataFrame to database
-    exporter.export_shapedf_to_db(zcta_df=df,
+    return exporter.export_shapedf_to_db(zcta_df=df,
                                   digit_max=digit_max,
                                   point_max=point_max)   
 

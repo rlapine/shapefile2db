@@ -4,7 +4,7 @@
 
 ---
 
-### ShapeFile2DB V 0.1.4
+### ShapeFile2DB V 0.1.5
 
 Exports US Census ZCTA (Zip Code Tabulation Area) shapefiles to a SQLite database via CLI or Python API.
 
